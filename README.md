@@ -58,6 +58,37 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+## Generating migrations for tenants
+
+To ensure the accurate generation of migrations, it is important to configure the schema in the `src/tenant-migrations.config.ts` file to match an existing tenant schema in your database. This step is necessary because the migration generation script relies on the current state of the database to generate the appropriate migration script.
+
+```bash
+# generate migration
+$ npm run migrations:g:t ./src/migrations/tenanted/MigrationName
+```
+
+After the migration is generated, you need to prefix all tables with the current schema configuration of the data source. This is to scope the migration within the schema configured in the data source. Follow this example for more details:
+
+```typescript
+public async up(queryRunner: QueryRunner): Promise<void> {
+  const { schema } = queryRunner.connection
+    .options as SqlServerConnectionOptions;
+
+  await queryRunner.query(
+    `CREATE TABLE "${schema}"."cats" (...)`,
+  );
+}
+```
+
+## Running migrations for tenants
+
+To run the migrations for all the tenant schemas in the database you can run the next script:
+
+```bash
+# run migrations
+$ npm run migrations:run:t
+```
+
 ## Support
 
 Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
